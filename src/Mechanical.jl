@@ -11,9 +11,5 @@ using .BoltLoads
 
 using Plots
 
-# change to plotly() backend for plots after pre-compilation of modules
-function __init__()
-    plotly()
-end
 
 end

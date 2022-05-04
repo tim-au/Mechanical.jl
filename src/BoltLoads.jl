@@ -8,7 +8,6 @@ export bolt_loads, plot_bolt_loads
 ####################################
 ###################################
 include("BoltPattern.jl")
-
 using .BoltPattern: bolt_centroid
 
 using LinearAlgebra
@@ -203,17 +202,19 @@ function plot_bolt_loads(points; Fc=[0,0,0]N, Mc = [0,0,0]N*m, A=1mm^2, udf_pivo
     yf = maximum(y_plot) + scale * yrange
     
     # hover text for plot
-    x_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", x_plot)
-    y_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", y_plot)
-    Paxial_hover = map(x -> "$(round.(x, digits=1)) $(load_format)", Paxial_plot)
-    PshearMag_hover = map(x -> "$(round.(x, digits=1)) $(load_format)", PshearMag_plot)
-    xc_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", xc_plot)
-    yc_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", yc_plot)
-    id = collect(1:length(x_hover))
+    # x_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", x_plot)
+    # y_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", y_plot)
+    # Paxial_hover = map(x -> "$(round.(x, digits=1)) $(load_format)", Paxial_plot)
+    # PshearMag_hover = map(x -> "$(round.(x, digits=1)) $(load_format)", PshearMag_plot)
+    # xc_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", xc_plot)
+    # yc_hover = map(x -> "$(round.(x, digits=1)) $(length_format)", yc_plot)
+    
+    
 
 
-    hovertext = map((a, b, c, d, e) -> "ID:     $(a)<br>x:      $(b)<br>y:      $(c)<br>Axial: $(d)<br>Shear:  $(e)",
-                    id,x_hover, y_hover, Paxial_hover, PshearMag_hover)
+
+    # hovertext = map((a, b, c, d, e) -> "ID:     $(a)<br>x:      $(b)<br>y:      $(c)<br>Axial: $(d)<br>Shear:  $(e)",
+    #                 id,x_hover, y_hover, Paxial_hover, PshearMag_hover)
 
     # scale arrow length
     max_arrow_length = 0.2 * xyrange
@@ -244,7 +245,6 @@ function plot_bolt_loads(points; Fc=[0,0,0]N, Mc = [0,0,0]N*m, A=1mm^2, udf_pivo
     p = plot();
     # Plot Paxial data on scatter plot
     scatter!(x_plot, y_plot,
-            hover = hovertext,
             xlims = [xs, xf],
             ylims = [ys, yf],
             aspect_ratio = 1,
@@ -261,11 +261,16 @@ function plot_bolt_loads(points; Fc=[0,0,0]N, Mc = [0,0,0]N*m, A=1mm^2, udf_pivo
      
     # Plot centroid on same plot
     scatter!([xc_plot], [yc_plot], markercolor = :grey, markersize = 8, markerstrokewidth = 1, 
-                markeralpha = 0.7, hover = "Centroid<br>xc: $(xc_hover)<br>yc: $(yc_hover)");
+                markeralpha = 0.7);
     vline!([ustrip(xc_plot)],
             color = :grey);
     hline!([ustrip(yc_plot)],
             color = :grey);
+
+    # annotate bolt ID on plot
+    bolt_id = [1:length(x)...]
+    bolt_id_text = map(a -> text("$a", :grey, :right, 12), bolt_id)
+    annotate!(ustrip(x) .+ xrange*0.1, ustrip(y), bolt_id_text)
 
     # plot Vxy
     for (xs, xf, ys, yf, h1x, h1y, h2x, h2y) in zip(x_plot, arrow_tip_x, y_plot, arrow_tip_y,

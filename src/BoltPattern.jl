@@ -65,12 +65,12 @@ end
 
 
 """
-    circle(;r, N=4, θ_start=0)
+    circle(;r, N=4, theta_start=0)
 
 Compute the x & y coordinates of a circular bolt pattern.
 
 `r` is the radius of the bolt pattern and `N` is the number of bolts in the bolt pattern. 
-`θ_start` is the angle measured clockwise from the y-axis to the first bolt in the pattern. Units 
+`theta_start` is the angle measured clockwise from the y-axis to the first bolt in the pattern. Units 
 conforming to the `Unitful` package should be applied.
 
 # Examples
@@ -80,8 +80,8 @@ julia> circle(r=100mm, N=3)
 (Quantity{Float64, 𝐋, Unitful.FreeUnits{(mm,), 𝐋, nothing}}  [6.123233995736766e-15 mm, 86.60254037844386 mm, -86.60254037844388 mm], Quantity{Float64, 𝐋, Unitful.FreeUnits{(mm,), 𝐋, nothing}}  [100.0 mm, -50.0 mm, -49.99999999999999 mm])
 ```
 """
-function circle(;r, N=4, θ_start=0)
-    β = deg2rad(θ_start)
+function circle(;r, N=4, theta_start=0)
+    β = deg2rad(theta_start)
     θ = LinRange(π/2, -3π/2 + 2π/N, N)
     points = @. r * cos(θ - β) , r * sin(θ - β) 
 
@@ -154,6 +154,7 @@ function plot_bolt_pattern(points; A = 1, udf_pivot = false)
     ys = minimum(y_plot) - scale * yrange
     yf = maximum(y_plot) + scale * yrange
   
+    # plot bolts
     scatter(x_plot, y_plot,
             xlims = [xs, xf],
             ylims = [ys, yf], 
@@ -166,13 +167,16 @@ function plot_bolt_pattern(points; A = 1, udf_pivot = false)
             legend = false,
             xlabel = "x coordinate [$unit_type]",
             ylabel = "y coordinate [$unit_type]")
+
+    # annotate bolt ID on plot
+    bolt_id = [1:length(x)...]
+    bolt_id_text = map(a -> text("$a", :grey, :right, 12), bolt_id)
+    annotate!(ustrip(x) .+ xrange*0.1, ustrip(y), bolt_id_text)
     
     # plot centroid
-    xc_hover = map(x -> "$(round.(ustrip(x), digits=1)) $(unit(x))", xc)
-    yc_hover = map(x -> "$(round.(ustrip(x), digits=1)) $(unit(x))", yc)
-
     scatter!([ustrip(xc)], [ustrip(yc)], markercolor = :grey, markersize = 8, markerstrokewidth = 1, 
-                markeralpha = 0.7, hover = "Centroid<br>xc: $(xc_hover)<br>yc: $(yc_hover)")
+    markeralpha = 0.7)
+
     vline!([ustrip(xc)],
             color = :grey)
     hline!([ustrip(yc)],
